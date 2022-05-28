@@ -16,7 +16,9 @@ lazy val app = crossProject(JSPlatform, JVMPlatform).in(file(".")).
       "com.typesafe.akka" %% "akka-actor" % akkaVersion,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
       "org.scalatest" %% "scalatest" % "3.2.12",
-      "edu.stanford.nlp" % "stanford-corenlp" % "4.4.0" artifacts (Artifact("stanford-corenlp", "models"), Artifact("stanford-corenlp"))
+      "edu.stanford.nlp" % "stanford-corenlp" % "4.4.0" artifacts (Artifact("stanford-corenlp", "models"), Artifact("stanford-corenlp")),
+      "com.lihaoyi" %% "autowire" % "0.3.3",
+      "com.lihaoyi" %% "upickle" % "1.6.0",
     )
   ).
   jsSettings(
@@ -25,6 +27,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform).in(file(".")).
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "1.0.0",
       "com.lihaoyi" %%% "scalatags" % "0.9.4",
-      "org.akka-js" %%% "akkajsactor" % "2.2.6.14"
+      "com.lihaoyi" %%% "autowire" % "0.3.3",
+      "com.lihaoyi" %%% "upickle" % "1.6.0",
     )
   )

@@ -1,11 +1,6 @@
 import akka.actor.{Actor, ActorLogging}
 
-object Classifier {
-  case class TcpMessage(tickers: List[String], headline: String)
-  case class ClassificationTask(tickers: List[String], headline: String)
-}
 class Classifier extends Actor with ActorLogging {
-  import Classifier._
   import Sentiment._
   val sentimentAnalyzer = new SentimentAnalyzer()
 

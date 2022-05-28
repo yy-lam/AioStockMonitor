@@ -3,19 +3,17 @@
   https://github.com/shekhargulati/52-technologies-in-2016/tree/master/03-stanford-corenlp
  */
 
-import java.util.Properties
 import edu.stanford.nlp.ling.CoreAnnotations
 import edu.stanford.nlp.neural.rnn.RNNCoreAnnotations
 import edu.stanford.nlp.pipeline.{Annotation, StanfordCoreNLP}
 import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 
+import java.util.Properties
 import scala.collection.convert.ImplicitConversions.`collection AsScalaIterable`
 
 object Sentiment extends Enumeration {
   type Sentiment = Value
   val POSITIVE, NEGATIVE, NEUTRAL = Value
-
-  case class Sentiments(pos: Int, neg: Int, neu: Int)
 
   def toSentiment(sentiment: Int): Sentiment = sentiment match {
     case x if x == 0 || x == 1 => Sentiment.NEGATIVE
@@ -32,7 +30,7 @@ class SentimentAnalyzer {
   val pipeline: StanfordCoreNLP = new StanfordCoreNLP(props)
 
   def mainSentiment(input: String): Sentiment = Option(input) match {
-    case Some(text) if !text.isEmpty => extractSentiment(text)
+    case Some(text) if text.nonEmpty => extractSentiment(text)
     case _ => throw new IllegalArgumentException("input can't be null or empty")
   }
 
