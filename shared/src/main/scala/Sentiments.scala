@@ -1,0 +1,1 @@
+case class Sentiments(pos: Int, neg: Int, neu: Int)
