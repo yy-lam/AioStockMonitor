@@ -1,17 +1,15 @@
-import java.net.InetSocketAddress
+package app
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.io.{IO, Tcp}
-import akka.util.ByteString
 
-import scala.collection.mutable
+import java.net.InetSocketAddress
 
 object SocketConsumer {
   def props(port: Int, sink: ActorRef): Props = Props(new SocketConsumer(port, sink))
 }
 
 class SocketConsumer(port: Int, sink: ActorRef) extends Actor with ActorLogging {
-
-  import SocketConsumer._
 
   import akka.io.Tcp._
   import context.system
