@@ -5,3 +5,5 @@ target/
 /.bsp/
 .git/
 /.idea/
+main.js
+main.js.map

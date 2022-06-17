@@ -24,9 +24,7 @@ class Classifier(sentimentAnalyzer: SentimentAnalyzer) extends Actor with ActorL
             case NEGATIVE => SentimentCounter(acc.pos, acc.neg+1, acc.neu)
             case NEUTRAL  => SentimentCounter(acc.pos, acc.neg, acc.neu+1)
           })
-//        log.info(s"[${self.path.name}] ${sentiments.toString}")
         context.actorSelection("/user/server") ! TaskResult(tickers.split(", "), sentiments)
-
       } catch {
         case e: Any => log.error(s"error parsing $message: $e")
       }

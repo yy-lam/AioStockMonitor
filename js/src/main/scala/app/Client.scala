@@ -1,39 +1,43 @@
 package app
 
-import scalatags.JsDom.all._
 import org.scalajs.dom
-import dom.html
-
-import scalajs.js.annotation.{JSExport, JSExportTopLevel}
-import scalajs.concurrent.JSExecutionContext.Implicits.queue
-import autowire._
-
-
-object Ajaxer extends autowire.Client[String, upickle.default.Reader, upickle.default.Writer]{
-  override def doCall(req: Request) = {
-    dom.ext.Ajax.post(
-      url = "/news",
-      data = upickle.default.write(req.args)
-    ).map(_.responseText)
-  }
-
-  def read[Result: upickle.default.Reader](p: String) = upickle.default.read[Result](p)
-  def write[Result: upickle.default.Writer](r: Result) = upickle.default.write(r)
-}
+import org.scalajs.dom._
+import scalatags.JsDom.all._
+import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 @JSExportTopLevel("app")
 object Client {
   @JSExport
-  def main(container: html.Div) = {
-    val inputBox = input.render
-    val outputBox = ul.render
-    def update() = {
-
-    }
+  def main(container: dom.html.Div) = {
     container.appendChild(
       div(
-        h1("Hello world"),
+        h1("Sentiment Monitor"),
       ).render
     )
+
+    val sse = new EventSource("news")
+        sse.onmessage = {
+          e: dom.MessageEvent => {
+            val msgElem = dom.document.getElementById("contents")
+            if (e != null && e.data != null) {
+              val stockSentiment = upickle.default.read[StockSentiment](e.data.toString)
+              val existedDiv = dom.document.getElementById(stockSentiment.ticker)
+              if (existedDiv == null) {
+                msgElem.appendChild(div(id:=stockSentiment.ticker,
+                  li(s"Ticker: ${stockSentiment.ticker}, " +
+                    s"Pos: ${stockSentiment.pos}, " +
+                    s"Neg: ${stockSentiment.neg}, " +
+                    s"Neu: ${stockSentiment.neu}")).render)
+              } else {
+                println("update values!")
+                existedDiv.firstChild.nodeValue = "new"
+              }
+            }
+          }
+        }
+
+
   }
 }
+
+

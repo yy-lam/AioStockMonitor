@@ -26,7 +26,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform).in(file(".")).
       "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
       "org.scalatest" %% "scalatest" % "3.2.12",
       "edu.stanford.nlp" % "stanford-corenlp" % "4.4.0" artifacts (Artifact("stanford-corenlp", "models"), Artifact("stanford-corenlp")),
-      "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4",
+      "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
     )
   ).
   jsSettings(

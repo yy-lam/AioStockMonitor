@@ -44,7 +44,7 @@ class SocketConsumer(port: Int, sink: ActorRef) extends Actor with ActorLogging 
       connection ! Register(self)
 
     case Received(message) =>
-//      log.info("Received: \n" + message.decodeString("UTF8"))
+      //      log.info("Received: \n" + message.decodeString("UTF8"))
       //      println("Received: \n"+ message.decodeString("UTF8"))
       for (combo <- message.decodeString("UTF8").split('\n')) sink ! combo
 
