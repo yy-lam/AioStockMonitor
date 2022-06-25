@@ -69,7 +69,7 @@ object AkkaHttpServer extends App with LazyLogging {
             ContentTypes.`text/html(UTF-8)`,
             Page.skeleton.render)
           )
-        } ~ getFromResourceDirectory("")
+        } ~ getFromResourceDirectory("scalajs-bundler")
       }
     )
   }

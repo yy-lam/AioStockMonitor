@@ -1,6 +1,7 @@
 ThisBuild / scalaVersion := "2.13.8"
 
 
+
 lazy val root = (project in file("."))
   .aggregate(app.js, app.jvm)
 
@@ -10,6 +11,7 @@ lazy val app = crossProject(JSPlatform, JVMPlatform).in(file(".")).
   settings(
     name := "app",
     version := "0.1-SNAPSHOT",
+    scalacOptions += "-Ymacro-annotations",
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "scalatags" % "0.9.4",
       "com.lihaoyi" %%% "upickle" % "2.0.0",
@@ -33,10 +35,20 @@ lazy val app = crossProject(JSPlatform, JVMPlatform).in(file(".")).
     // Add JS-specific settings here
 //    scalaJSUseMainModuleInitializer := true,
     Compile / mainClass := Some("app.Client"),
+    Compile / npmUpdate / crossTarget := baseDirectory.value / "../jvm/src/main/resources/scalajs-bundler/",
+//    crossTarget in npmUpdate in Compile := baseDirectory.value / "../jvm/src/main/resources/main",
     Compile / fastOptJS / artifactPath := baseDirectory.value / "../jvm/src/main/resources/main.js",
     Compile / fullOptJS / artifactPath := baseDirectory.value / "../jvm/src/main/resources/main.js",
+    Compile / npmDependencies ++= Seq(
+      "react" -> "17.0.2",
+      "react-dom" -> "17.0.2"
+    ),
     libraryDependencies ++= Seq(
-      "org.scala-js" %%% "scalajs-dom" % "1.0.0",
-      "com.lihaoyi" %%% "scalatags" % "0.9.4",
+      "org.scala-js" %%% "scalajs-dom" % "2.0.0",
+      "com.lihaoyi" %%% "scalatags" % "0.11.1",
+      "me.shadaj" %%% "slinky-core" % "0.7.0",
+      "me.shadaj" %%% "slinky-web" % "0.7.0",
     )
-  )
+  ).
+  jsConfigure { project => project.enablePlugins(ScalaJSBundlerPlugin) }
+
