@@ -33,12 +33,12 @@ lazy val app = crossProject(JSPlatform, JVMPlatform).in(file(".")).
   ).
   jsSettings(
     // Add JS-specific settings here
-//    scalaJSUseMainModuleInitializer := true,
+    scalaJSUseMainModuleInitializer := true,
     Compile / mainClass := Some("app.Client"),
     Compile / npmUpdate / crossTarget := baseDirectory.value / "../jvm/src/main/resources/scalajs-bundler/",
 //    crossTarget in npmUpdate in Compile := baseDirectory.value / "../jvm/src/main/resources/main",
-    Compile / fastOptJS / artifactPath := baseDirectory.value / "../jvm/src/main/resources/main.js",
-    Compile / fullOptJS / artifactPath := baseDirectory.value / "../jvm/src/main/resources/main.js",
+//    Compile / fastOptJS / artifactPath := baseDirectory.value / "../jvm/src/main/resources/main.js",
+//    Compile / fullOptJS / artifactPath := baseDirectory.value / "../jvm/src/main/resources/main.js",
     Compile / npmDependencies ++= Seq(
       "react" -> "17.0.2",
       "react-dom" -> "17.0.2"

@@ -8,16 +8,12 @@ import slinky.web.ReactDOM
 import slinky.web.html._
 
 
-@JSExportTopLevel("app")
+//@JSExportTopLevel("app")
 object Client {
 //  @JSExport
   def main(args: Array[String]): Unit = {
-//    container.appendChild(
-//      div(
-//        h1("Sentiment Monitor"),
-//      ).render
-//    )
-//
+    println("Hello ScalaJS")
+
 //    val sse = new EventSource("news")
 //        sse.onmessage = {
 //          e: dom.MessageEvent => {
@@ -40,7 +36,7 @@ object Client {
 //        }
 
     ReactDOM.render(
-      h1 ("Hello, world!"),
+      Layout(),
       document.getElementById("contents")
     )
 
