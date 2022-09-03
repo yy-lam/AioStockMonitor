@@ -60,19 +60,42 @@ object AkkaHttpServer extends App with LazyLogging {
     }
   }
 
-  val routes: Route = {
-    concat(
+  val routes: Route =
+    pathSingleSlash {
       get {
-        pathSingleSlash {
-          complete(
-            HttpEntity(
+        complete {
+          HttpEntity(
             ContentTypes.`text/html(UTF-8)`,
             Page.skeleton.render)
-          )
-        } ~ getFromResourceDirectory("")
+        }
       }
-    )
-  }
+    } ~
+      pathPrefix("assets" / Remaining) { file =>
+        // optionally compresses the response with Gzip or Deflate
+        // if the client accepts compressed responses
+        encodeResponse {
+          getFromResource("public/" + file)
+        }
+      }
+
+//  val routes: Route = {
+//    concat(
+//      get {
+//        pathSingleSlash {
+//          complete(
+//            HttpEntity(
+//            ContentTypes.`text/html(UTF-8)`,
+//            Page.skeleton.render)
+//          )
+//        } ~
+//        pathPrefix("assets" / Remaining) { file =>
+//          encodeResponse {
+//            getFromResource("public/" + file)
+//          }
+//        }
+//      }
+//    )
+//  }
 
   val futureBinding = Http().newServerAt("localhost", 8080).bind(routes ~ sseRoute)
   futureBinding.onComplete {

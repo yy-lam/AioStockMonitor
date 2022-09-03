@@ -39,7 +39,6 @@ object Client {
       Layout(),
       document.getElementById("contents")
     )
-
   }
 }
 

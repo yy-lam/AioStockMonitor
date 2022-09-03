@@ -15,7 +15,7 @@ object Page {
       ),
       body(
         div(id:="contents"),
-        script(src:="/scalajs-bundler/app-fastopt-bundle.js")
+        script(src:="/assets/client-fastopt-bundle.js")
       )
     )
 }
