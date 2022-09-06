@@ -42,7 +42,7 @@ object AkkaHttpServer extends App with LazyLogging {
 
   val (streamingActor, sseSource) =
     Source.actorRef[StockSentiment](20, akka.stream.OverflowStrategy.dropTail)
-      .map(s => ServerSentEvent(upickle.default.write[StockSentiment](s)))
+      .map(s => ServerSentEvent(upickle.default.write[StockSentiment](s), "newEntry"))
       .keepAlive(1.second, () => ServerSentEvent.heartbeat)
       .toMat(BroadcastHub.sink[ServerSentEvent])(Keep.both)
       .run()
@@ -77,25 +77,6 @@ object AkkaHttpServer extends App with LazyLogging {
           getFromResource("public/" + file)
         }
       }
-
-//  val routes: Route = {
-//    concat(
-//      get {
-//        pathSingleSlash {
-//          complete(
-//            HttpEntity(
-//            ContentTypes.`text/html(UTF-8)`,
-//            Page.skeleton.render)
-//          )
-//        } ~
-//        pathPrefix("assets" / Remaining) { file =>
-//          encodeResponse {
-//            getFromResource("public/" + file)
-//          }
-//        }
-//      }
-//    )
-//  }
 
   val futureBinding = Http().newServerAt("localhost", 8080).bind(routes ~ sseRoute)
   futureBinding.onComplete {
