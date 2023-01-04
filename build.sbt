@@ -1,6 +1,6 @@
 ThisBuild / scalaVersion := "2.13.8"
 
-val akkaVersion = "2.6.19"
+val akkaVersion = "2.7.0"
 val akkaHttpVersion = "10.2.9"
 
 lazy val root = (project in file("."))
@@ -14,6 +14,7 @@ lazy val server = project.settings(
   // Expose as sbt-web assets some files retrieved from the NPM packages of the `client` project
   npmAssets ++= NpmAssets.ofProject(client) { modules => (modules / "font-awesome").allPaths }.value,
   Compile / compile := ((Compile / compile) dependsOn scalaJSPipeline).value,
+  // The assets (js files, sourcemaps, etc.) are added to the classpath during development thanks to the following lines
   Assets / WebKeys.packagePrefix := "public/",
   Runtime / managedClasspath += (Assets / packageBin).value,
   Compile / mainClass := Some("app.AkkaHttpServer"),
