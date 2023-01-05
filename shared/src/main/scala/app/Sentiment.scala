@@ -10,5 +10,3 @@ object Sentiment extends Enumeration {
     case x if x == 3 || x == 4 => Sentiment.POSITIVE
   }
 }
-
-case class SentimentCounter(pos: Int, neg: Int, neu: Int)

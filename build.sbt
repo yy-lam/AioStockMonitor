@@ -1,7 +1,7 @@
 ThisBuild / scalaVersion := "2.13.8"
 
 val akkaVersion = "2.7.0"
-val akkaHttpVersion = "10.2.9"
+val akkaHttpVersion = "10.4.0"
 
 lazy val root = (project in file("."))
   .aggregate(server, client, sharedJvm, sharedJs)

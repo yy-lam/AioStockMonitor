@@ -17,12 +17,4 @@ import scala.scalajs.js
       p (s"Positive: ${state.pos} | Negative: ${state.neg} | Neutral: ${state.neu}")
     )
   }
-//  val component = FunctionalComponent[Props] { props =>
-//    val (state, updateState) = useState(props.initialSent)
-//
-//    div(style := js.Dynamic.literal(border = "1px solid black"))(
-//      h1 (props.tick),
-//      p (s"Positive: ${state.pos} | Negative: ${state.neg} | Neutral: ${state.neu}")
-//    )
-//  }
 }

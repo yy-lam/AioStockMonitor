@@ -6,9 +6,10 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.sse.ServerSentEvent
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
+import akka.io.Tcp.Abort
 import akka.routing.BalancingPool
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{BroadcastHub, Keep, Source}
+import akka.stream.{ActorMaterializer, DelayOverflowStrategy, OverflowStrategy}
+import akka.stream.scaladsl.{BroadcastHub, Keep, Source, SourceQueueWithComplete}
 import com.typesafe.scalalogging.LazyLogging
 import edu.stanford.nlp.pipeline.StanfordCoreNLP
 
@@ -18,22 +19,23 @@ import scala.io.StdIn
 import scala.util.{Failure, Success}
 import scala.collection.mutable.HashMap
 
-class ServerActor(streamingActor: ActorRef) extends Actor {
+case class Stop()
+class ServerActor(sourceQueue: SourceQueueWithComplete[StockSentiments]) extends Actor {
   import Classifier._
+  implicit lazy val ec = context.dispatcher
+
   var stockSentiments = HashMap[String, SentimentCounter]()
   val props = new Properties()
   props.setProperty("annotators", "tokenize, ssplit, parse, sentiment")
   val pipeline: StanfordCoreNLP = new StanfordCoreNLP(props)
   val sentimentAnalyzer = new SentimentAnalyzer(pipeline)
-  val classifiers: ActorRef = context.actorOf(BalancingPool(3).props(Classifier.props(sentimentAnalyzer).withDispatcher("resizable-thread-pool")), "master")
-  val consumer: ActorRef = context.actorOf(SocketConsumer.props(9000, classifiers), s"consumer")
+  val classifiers: ActorRef = context.actorOf(BalancingPool(6).props(Classifier.props(sentimentAnalyzer)), "master")
+  val consumer: ActorRef = context.actorOf(SocketConsumer.props(9000, classifiers), "consumer")
 
   override def receive: Receive = {
-    case TaskResult(tickers: Array[String], sentiments: SentimentCounter) =>
-      tickers.foreach(ticker => stockSentiments.getOrElse(ticker, SentimentCounter(0, 0, 0)) match {
-        case counter => stockSentiments(ticker) = SentimentCounter(counter.pos + sentiments.pos, counter.neg + sentiments.neg, counter.neu + sentiments.neu)
-      })
-      stockSentiments.foreachEntry((ticker, sentiment) => streamingActor ! StockSentiment(ticker, sentiment.pos, sentiment.neg, sentiment.neu))
+    case TaskResult(tickers: Array[String], sentiment: SentimentCounter) =>
+      sourceQueue.offer(StockSentiments(tickers, sentiment))
+    case Stop => consumer ! Abort
   }
 }
 
@@ -42,14 +44,14 @@ object AkkaHttpServer extends App with LazyLogging {
   implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
-  val (streamingActor, sseSource) =
-    Source.actorRef[StockSentiment](256, akka.stream.OverflowStrategy.dropHead)
-      .map(s => ServerSentEvent(upickle.default.write[StockSentiment](s), "newEntry"))
-      .keepAlive(1.second, () => ServerSentEvent.heartbeat)
-      .toMat(BroadcastHub.sink[ServerSentEvent])(Keep.both)
-      .run()
+  lazy val (sourceQueue, sseSource) = Source.queue[StockSentiments](Int.MaxValue, OverflowStrategy.backpressure)
+    .delay(1.seconds, DelayOverflowStrategy.backpressure)
+    .map(s => ServerSentEvent(upickle.default.write[StockSentiments](s), Some("newEntry")))
+//    .keepAlive(1.second, () => ServerSentEvent.heartbeat)
+    .toMat(BroadcastHub.sink[ServerSentEvent])(Keep.both)
+    .run()
 
-  val serverActor = system.actorOf(Props(new ServerActor(streamingActor)), "server")
+  val serverActor = system.actorOf(Props(new ServerActor(sourceQueue)), "server")
 
   val sseRoute: Route = {
     import akka.http.scaladsl.marshalling.sse.EventStreamMarshalling._
@@ -87,6 +89,7 @@ object AkkaHttpServer extends App with LazyLogging {
       system.log.info("Server online at http://{}:{}/", address.getHostString, address.getPort)
     case Failure(ex) =>
       system.log.error("Failed to bind HTTP endpoint, terminating system", ex)
+      serverActor ! Stop
       system.terminate()
   }
 
